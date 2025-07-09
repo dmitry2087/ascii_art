@@ -12,9 +12,10 @@ ASCII-ART приложение позволяет работать с перев
 
 ## Технологии и требования
 - **macOS**:
-1. macOS 14.0+;
-2. Swift (5.9+);
-3. SwiftUI.
+1. Apple Silicon;
+2. macOS 14.0+;
+3. Swift (5.9+);
+4. SwiftUI.
 
 - **Linux**:
 1. Ubuntu Linux;
