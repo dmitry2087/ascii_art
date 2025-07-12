@@ -76,7 +76,7 @@ struct MenuScreenView: View {
                             Spacer()
                         }
                         .padding(20)
-                        .frame(maxWidth: 500)
+                        .frame(maxWidth: .infinity) // Изменено с maxWidth: 500
                         .background(Color.green.opacity(0.1))
                         .cornerRadius(12)
                         .overlay(
@@ -101,7 +101,7 @@ struct MenuScreenView: View {
                             Spacer()
                         }
                         .padding(20)
-                        .frame(maxWidth: 500)
+                        .frame(maxWidth: .infinity) // Изменено с maxWidth: 500
                         .background(Color.green.opacity(0.1))
                         .cornerRadius(12)
                         .overlay(
