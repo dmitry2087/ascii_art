@@ -16,21 +16,35 @@ enum AppMode {
 
 struct MainMenuView: View {
     @State private var selectedMode: AppMode?
+    @EnvironmentObject var alertManager: AlertManager // Добавляем для работы с алертами
     
     var body: some View {
-        if let mode = selectedMode {
-            // Показываем соответствующий режим
-            switch mode {
-            case .imageToASCII:
-                ImageToASCIIView(onBack: { selectedMode = nil })
-            case .textToASCII:
-                TextToASCIIView(onBack: { selectedMode = nil })
+        Group {
+            if let mode = selectedMode {
+                // Показываем соответствующий режим
+                switch mode {
+                case .imageToASCII:
+                    ImageToASCIIView(onBack: { selectedMode = nil })
+                case .textToASCII:
+                    TextToASCIIView(onBack: { selectedMode = nil })
+                }
+            } else {
+                // Главное меню
+                MenuScreenView(
+                    onImageMode: { selectedMode = .imageToASCII },
+                    onTextMode: { selectedMode = .textToASCII }
+                )
             }
-        } else {
-            // Главное меню
-            MenuScreenView(
-                onImageMode: { selectedMode = .imageToASCII },
-                onTextMode: { selectedMode = .textToASCII }
+        }
+        .alert(item: $alertManager.alert) { item in
+            Alert(
+                title: Text(item.title),
+                message: Text(item.message),
+                dismissButton: .default(Text("OK")) {
+                    if item.shouldExit {
+                        NSApp.terminate(nil)
+                    }
+                }
             )
         }
     }
@@ -76,7 +90,7 @@ struct MenuScreenView: View {
                             Spacer()
                         }
                         .padding(20)
-                        .frame(maxWidth: .infinity) // Изменено с maxWidth: 500
+                        .frame(maxWidth: .infinity)
                         .background(Color.green.opacity(0.1))
                         .cornerRadius(12)
                         .overlay(
@@ -101,7 +115,7 @@ struct MenuScreenView: View {
                             Spacer()
                         }
                         .padding(20)
-                        .frame(maxWidth: .infinity) // Изменено с maxWidth: 500
+                        .frame(maxWidth: .infinity)
                         .background(Color.green.opacity(0.1))
                         .cornerRadius(12)
                         .overlay(

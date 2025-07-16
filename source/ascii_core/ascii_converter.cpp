@@ -10,10 +10,10 @@
 #include "ascii_converter.hpp"
 #include <format>
 #include <fstream>
-#include <nlohmann/json.hpp>
-
+#include <sstream>
+#include "../../external/json/json.hpp"
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "../../external/stb/stb_image.h"
 
 using json = nlohmann::json;
 
@@ -38,7 +38,7 @@ void ASCIIConverter::loadAsciiFont(const std::string& fontFilePath) {
             for (const auto& line : value) {
                 pattern.push_back(line.get<std::string>());
             }
-            if (pattern.size() == 5) { // Проверяем, что шаблон имеет 5 строк
+            if (pattern.size() == 7) { // Проверяем, что шаблон имеет 7 строк
                 asciiFont[c] = pattern;
             }
         }
@@ -83,7 +83,7 @@ std::string ASCIIConverter::convertImageToASCII(const std::string& imagePath, in
 
 // Преобразование текста в ASCII-арт
 std::string ASCIIConverter::convertTextToASCII(const std::string& text) {
-    const int lines = 5; // Высота каждого символа
+    const int lines = 7; // Высота каждого символа
     std::vector<std::string> result(lines, "");
 
     for (char c : text) {
@@ -100,25 +100,44 @@ std::string ASCIIConverter::convertTextToASCII(const std::string& text) {
         }
     }
 
-    return std::format("{}", fmt::join(result, "\n"));
+    std::ostringstream oss;
+    for (size_t i = 0; i < result.size(); ++i) {
+        oss << result[i];
+        if (i + 1 != result.size()) oss << "\n";
+    }
+    return oss.str();
 }
 
 // C-совместимые функции для Swift
 extern "C" {
-    const char* convert_image_to_ascii(const char* imagePath, int outputWidth) {
-        ASCIIConverter converter("Resources/ascii_font.json");
-        std::string result = converter.convertImageToASCII(imagePath, outputWidth);
-        char* cstr = new char[result.size() + 1];
-        std::strcpy(cstr, result.c_str());
-        return cstr;
+    const char* convert_image_to_ascii(const char* fontPath, const char* imagePath, int outputWidth) {
+        try {
+            ASCIIConverter converter(fontPath);
+            std::string result = converter.convertImageToASCII(imagePath, outputWidth);
+            char* cstr = new char[result.size() + 1];
+            std::strcpy(cstr, result.c_str());
+            return cstr;
+        } catch (const std::exception& e) {
+            std::string error = "Ошибка: " + std::string(e.what());
+            char* cstr = new char[error.size() + 1];
+            std::strcpy(cstr, error.c_str());
+            return cstr;
+        }
     }
 
-    const char* convert_text_to_ascii(const char* text) {
-        ASCIIConverter converter("Resources/ascii_font.json");
-        std::string result = converter.convertTextToASCII(text);
-        char* cstr = new char[result.size() + 1];
-        std::strcpy(cstr, result.c_str());
-        return cstr;
+    const char* convert_text_to_ascii(const char* fontPath, const char* text) {
+        try {
+            ASCIIConverter converter(fontPath);
+            std::string result = converter.convertTextToASCII(text);
+            char* cstr = new char[result.size() + 1];
+            std::strcpy(cstr, result.c_str());
+            return cstr;
+        } catch (const std::exception& e) {
+            std::string error = "Ошибка: " + std::string(e.what());
+            char* cstr = new char[error.size() + 1];
+            std::strcpy(cstr, error.c_str());
+            return cstr;
+        }
     }
 
     void free_ascii_string(const char* str) {

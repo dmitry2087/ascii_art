@@ -9,10 +9,11 @@
 
 ## Технологии и требования
 ### macOS:
-- Apple Silicon  
+- Apple Silicon (M1+)
 - macOS 14.0+  
 - Swift (5.9+)  
-- SwiftUI  
+- Clang 15+
+- Xcode 15+
 
 ### Linux:
 - Ubuntu Linux  

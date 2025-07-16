@@ -69,16 +69,25 @@ class TextToASCIIViewModel: ObservableObject {
     @Published var asciiArt: String = ""
     private let alertManager = AlertManager.shared
     
-    // Преобразование текста в ASCII-арт через C++
     func convertTextToASCII() {
-        if let cString = convert_text_to_ascii(inputText.cString(using: .utf8)) {
-            asciiArt = String(cString: cString)
-            free_ascii_string(cString) // Освобождаем память
+        if let fontPath = Bundle.main.path(forResource: "ascii_font", ofType: "json"),
+           let textCString = inputText.cString(using: .utf8) {
+            if let cString = convert_text_to_ascii(fontPath, textCString) {
+                asciiArt = String(cString: cString)
+                free_ascii_string(cString)
+            } else {
+                asciiArt = ""
+                alertManager.show(AlertItem(
+                    title: "Ошибка",
+                    message: "Не удалось преобразовать текст в ASCII.",
+                    shouldExit: false
+                ))
+            }
         } else {
             asciiArt = ""
             alertManager.show(AlertItem(
                 title: "Ошибка",
-                message: "Не удалось преобразовать текст в ASCII.",
+                message: "Файл шрифта не найден или текст не может быть преобразован.",
                 shouldExit: false
             ))
         }

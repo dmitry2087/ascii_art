@@ -7,6 +7,7 @@
 // Приложение ASCII-ART для macOS
 // AnimationType.swift
 
+import SwiftUI
 import Foundation
 
 enum AnimationType {

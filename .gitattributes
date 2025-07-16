@@ -1,0 +1,2 @@
+# Исключаем папку external с внешним кодом из статистики GitHub
+external/** linguist-vendored

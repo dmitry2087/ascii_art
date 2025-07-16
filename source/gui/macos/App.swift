@@ -4,10 +4,11 @@
 // #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
 // "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
 //                                     m"                               
-// ASCII-ART app for macOS                               
-// App.swift
+// Приложение ASCII-ART для macOS                               
+// App.swift (главный файл приложения macOS)
 
 import SwiftUI
+import AppKit // Для NSApplication
 
 @main
 struct ASCIIArtApp: App {
@@ -16,19 +17,15 @@ struct ASCIIArtApp: App {
     init() {
         // Проверка совместимости версии macOS
         guard #available(macOS 14.0, *) else {
-            alertManager.show(
-                AlertItem(
-                    title: "Ошибка",
-                    message: "Требуется macOS 14.0 или новее."
-                )
-            )
+            // Показываем системный алерт
+            let alert = NSAlert()
+            alert.messageText = "Ошибка"
+            alert.informativeText = "Требуется macOS 14.0 или новее."
+            alert.alertStyle = .critical
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            NSApp.terminate(nil)
             return
-        }
-        
-        // Установка иконки приложения
-        if let iconPath = Bundle.main.path(forResource: "icon", ofType: "png") {
-            let iconImage = NSImage(contentsOfFile: iconPath)
-            NSApp.applicationIconImage = iconImage
         }
     }
     
@@ -37,19 +34,6 @@ struct ASCIIArtApp: App {
             MainMenuView()
                 .environmentObject(alertManager)
                 .frame(minWidth: 900, minHeight: 600)
-        }
-        .windowStyle(.titleBar)
-        .windowToolbarStyle(.unified)
-        .alert(item: $alertManager.alert) { item in
-            Alert(
-                title: Text(item.title),
-                message: Text(item.message),
-                dismissButton: .default(Text("OK")) {
-                    if item.shouldExit {
-                        NSApp.terminate(nil)
-                    }
-                }
-            )
         }
     }
 }
