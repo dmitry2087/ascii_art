@@ -8,16 +8,16 @@
 // App.swift (главный файл приложения macOS)
 
 import SwiftUI
-import AppKit // Для NSApplication
+import AppKit
 
 @main
 struct ASCIIArtApp: App {
     @StateObject private var alertManager = AlertManager.shared
+    @StateObject private var appSettings = AppSettings()
+    @State private var showingSettings = false
     
     init() {
-        // Проверка совместимости версии macOS
         guard #available(macOS 14.0, *) else {
-            // Показываем системный алерт
             let alert = NSAlert()
             alert.messageText = "Ошибка"
             alert.informativeText = "Требуется macOS 14.0 или новее."
@@ -31,34 +31,17 @@ struct ASCIIArtApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MainMenuView()
+            MainMenuView(showingSettings: $showingSettings)
                 .environmentObject(alertManager)
+                .environmentObject(appSettings)
                 .frame(minWidth: 900, minHeight: 600)
         }
-    }
-}
-
-// Менеджер алертов
-final class AlertManager: ObservableObject {
-    static let shared = AlertManager()
-    @Published var alert: AlertItem?
-    
-    private init() {}
-    
-    func show(_ item: AlertItem) {
-        alert = item
-    }
-}
-
-struct AlertItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let message: String
-    let shouldExit: Bool
-    
-    init(title: String, message: String, shouldExit: Bool = false) {
-        self.title = title
-        self.message = message
-        self.shouldExit = shouldExit
+        .commands {
+            CommandMenu("Settings") {
+                Button("Open Settings") {
+                    showingSettings = true
+                }
+            }
+        }
     }
 }

@@ -10,7 +10,7 @@
 import SwiftUI
 import Foundation
 
-enum AnimationType {
+enum AnimationType: String, CaseIterable {
     case randomNoise // Случайный шум
     case wavePattern // Волновой узор
     case fallingChars // Падающие символы
@@ -45,7 +45,7 @@ enum AnimationType {
         case .fallingChars:
             var frame = ""
             let chars = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-            for y in 0..<height {
+            for _ in 0..<height {
                 for x in 0..<width {
                     let offset = Int(Double(frameCount + x * 3) * 0.1) % chars.count
                     frame += String(chars[offset])

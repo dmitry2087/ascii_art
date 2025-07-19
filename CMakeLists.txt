@@ -42,10 +42,13 @@ if(APPLE)
 
     add_executable(AsciiArtApp
         source/gui/macos/App.swift
+        source/gui/macos/AppSettings.swift
         source/gui/macos/MainMenuView.swift
         source/gui/macos/ImageToASCIIView.swift
         source/gui/macos/TextToASCIIView.swift
         source/gui/macos/SharedComponents.swift
+        source/gui/macos/SettingsView.swift
+        source/gui/macos/MainScreenView.swift
         source/gui/macos/AnimationType.swift
         source/gui/macos/ASCIIConverterBridging.h  # Заголовочный файл для Swift
         ${RESOURCE_FILES}
