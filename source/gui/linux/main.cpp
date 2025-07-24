@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <format>
+#include <filesystem>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -18,12 +19,15 @@
 #include <stb_image.h>
 
 int main() {
-    // Инициализация GLFW
+    // Принудительно используем X11 для Ubuntu 25.04
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
     if (!glfwInit()) {
         std::cerr << std::format("GLFW init failed") << std::endl;
         return -1;
     }
-    GLFWwindow* window = glfwCreateWindow(800, 600, "ASCII Art Studio", nullptr, nullptr);
+
+    // Создаём окно
+    GLFWwindow* window = glfwCreateWindow(900, 600, "ASCII Art Studio", nullptr, nullptr);
     if (!window) {
         std::cerr << std::format("Window creation failed") << std::endl;
         glfwTerminate();
@@ -31,9 +35,10 @@ int main() {
     }
     glfwMakeContextCurrent(window);
 
+    // Загружаем иконку
     GLFWimage images[1];
     int width, height, channels;
-        unsigned char* img = stbi_load("Resources/icon.png", &width, &height, &channels, 0);
+    unsigned char* img = stbi_load("Resources/icon.png", &width, &height, &channels, 0);
     if (img) {
         images[0].width = width;
         images[0].height = height;
@@ -47,8 +52,13 @@ int main() {
     // Инициализация ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 12.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+
+    // Отладка текущей директории
+    std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
 
     // Создаём конвертер
     ASCIIConverter converter("Resources/ascii_font.json");

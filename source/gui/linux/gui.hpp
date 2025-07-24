@@ -11,24 +11,50 @@
 #define GUI_HPP
 
 #include <string>
+#include <vector>
+#include <imgui.h>
 
-class ASCIIConverter;  // Форвард декларация (класс из ascii_converter.hpp)
+class ASCIIConverter;
+
+enum class AnimationType {
+    RandomNoise,
+    WavePattern,
+    FallingChars
+};
+
+enum class AnimationColor {
+    Green, White, Red, Blue, Orange, Purple, Pink
+};
 
 class Gui {
 private:
-    ASCIIConverter* converter;  // Конвертер для ASCII
-    std::string inputText;  // Ввод текста
-    std::string asciiResultText;  // Результат для текста
-    std::string imagePath;  // Путь к изображению
-    std::string asciiResultImage;  // Результат для изображения
-    bool showTextWindow;  // Флаг окна текста
-    bool showImageWindow;  // Флаг окна изображения
+    ASCIIConverter* converter;
+    std::string inputText;
+    std::string asciiResultText;
+    std::string imagePath;
+    std::string asciiResultImage;
+    bool showTextWindow;
+    bool showImageWindow;
+    bool showSettingsWindow;
+    AnimationType selectedAnimationType;
+    AnimationColor selectedAnimationColor;
+    std::string animationFrame;
+    int animationWidth;
+    int animationHeight;
+    int frameCount;
+    float animationTimer;
+
+    // Функции анимации
+    void updateAnimationFrame();
+    std::string generateRandomNoise();
+    std::string generateWavePattern();
+    std::string generateFallingChars();
 
 public:
-    Gui(ASCIIConverter* conv);  // Конструктор
-    ~Gui();  // Деструктор
+    Gui(ASCIIConverter* conv);
+    ~Gui();
 
-    void draw();  // Рисование UI
+    void draw();
 };
 
 #endif // GUI_HPP
