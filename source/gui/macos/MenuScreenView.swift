@@ -1,30 +1,41 @@
+//     #           "      m                   mmmm   mmmm   mmmm  mmmmmm
+//  mmm#  mmmmm  mmm    mm#mm   m mm  m   m  "   "# m"  "m #    #     #"
+// #" "#  # # #    #      #     #"  " "m m"      m" #  m # "mmmm"    m" 
+// #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
+// "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
+//                                     m"                               
+// Приложение ASCII Art Studio для macOS
+// MenuScreenView.swift
+
 import SwiftUI
 
-struct MenuScreenView: View {
-    let onImageMode: () -> Void
-    let onTextMode: () -> Void
-    @EnvironmentObject var appSettings: AppSettings
-    @StateObject private var animationViewModel: AnimationViewModel
+struct MenuScreenView: View {  // Главное меню с анимацией и кнопками
+    let onImageMode: () -> Void  // Колбэк для режима изображений
+    let onTextMode: () -> Void  // Колбэк для режима текста
+    @EnvironmentObject var appSettings: AppSettings  // Настройки
+    @StateObject private var animationViewModel: AnimationViewModel  // Модель анимации
     
-    init(onImageMode: @escaping () -> Void, onTextMode: @escaping () -> Void, appSettings: AppSettings) {
+    init(onImageMode: @escaping () -> Void, onTextMode: @escaping () -> Void, appSettings: AppSettings) {  // Инициализатор
         self.onImageMode = onImageMode
         self.onTextMode = onTextMode
         _animationViewModel = StateObject(wrappedValue: AnimationViewModel(appSettings: appSettings))
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
+        GeometryReader { geometry in  // Геометрия для адаптации под размер окна
+            ZStack {  // Стек для фона и контента
                 BackgroundAnimationView(viewModel: animationViewModel, size: geometry.size, color: appSettings.selectedColor.color)
-                    .onAppear {
-                        animationViewModel.setSize(width: Int(geometry.size.width / 6), height: Int(geometry.size.height / 10))
+                    .ignoresSafeArea(.all)  // Игнорирование всех safe areas (включая меню-бар ~24px) для полного покрытия экрана (macOS 14.0)
+                    .clipped()  // Ограничение контента границами окна
+                    .onAppear {  // Запуск анимации при появлении
+                        animationViewModel.setSize(width: Int(geometry.size.width), height: Int(geometry.size.height))
                         animationViewModel.startAnimation()
                     }
-                    .onChange(of: geometry.size) { newSize in
-                        animationViewModel.setSize(width: Int(newSize.width / 6), height: Int(newSize.height / 10))
+                    .onChange(of: geometry.size) { newSize in  // Обновление размера анимации (macOS 14.0 compatible)
+                        animationViewModel.setSize(width: Int(newSize.width), height: Int(newSize.height))
                     }
                 
-                VStack(spacing: 40) {
+                VStack(spacing: 40) {  // Контент меню
                     VStack(spacing: 8) {
                         Text("ASCII ART STUDIO")
                             .font(.system(size: 36, weight: .bold, design: .monospaced))
@@ -34,9 +45,10 @@ struct MenuScreenView: View {
                             .font(.system(size: 18, weight: .medium, design: .monospaced))
                             .foregroundColor(appSettings.selectedColor.color.opacity(0.8))
                     }
+                    .padding(.top, 30)  // Отступ сверху для избежания перекрытия меню-баром (~24px)
                     
-                    VStack(spacing: 20) {
-                        Button(action: onImageMode) {
+                    HStack(spacing: 20) {  // Горизонтальный стек для двух кнопок
+                        Button(action: onImageMode) {  // Кнопка для изображений
                             HStack {
                                 Image(systemName: "photo.artframe")
                                     .font(.system(size: 24))
@@ -60,8 +72,9 @@ struct MenuScreenView: View {
                         }
                         .buttonStyle(.plain)
                         .foregroundColor(appSettings.selectedColor.color)
+                        .scaledToFit()  // Адаптация кнопки для малых окон (Hacking with Swift)
                         
-                        Button(action: onTextMode) {
+                        Button(action: onTextMode) {  // Кнопка для текста
                             HStack {
                                 Image(systemName: "textformat.alt")
                                     .font(.system(size: 24))
@@ -85,16 +98,21 @@ struct MenuScreenView: View {
                         }
                         .buttonStyle(.plain)
                         .foregroundColor(appSettings.selectedColor.color)
+                        .scaledToFit()  // Адаптация кнопки
                     }
                     
-                    Spacer()
+                    Spacer()  // Пространство внизу
                 }
                 .padding()
+                .frame(maxHeight: geometry.size.height)  // Ограничение высоты контента окном
+                .padding(.bottom, 20)  // Отступ снизу для кнопок
+                .clipped()  // Предотвращение выхода за границы
             }
             .background(Color.black)
-            .onDisappear {
-                animationViewModel.stopAnimation()
-            }
+            .ignoresSafeArea(.all)  // Полноэкранный стек для macOS 14.0
+        }
+        .onDisappear {  // Остановка анимации
+            animationViewModel.stopAnimation()
         }
     }
 }

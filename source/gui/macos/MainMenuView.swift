@@ -4,38 +4,39 @@
 // #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
 // "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
 //                                     m"                               
-// ASCII-ART app for macOS   
+// Приложение ASCII Art Studio для macOS
 // MainMenuView.swift
 
 import SwiftUI
 
-struct MainMenuView: View {
-    @Binding var showingSettings: Bool
-    @State private var selectedMode: AppMode?
-    @EnvironmentObject var alertManager: AlertManager
-    @EnvironmentObject var appSettings: AppSettings
+struct MainMenuView: View {  // Основное представление меню приложения
+    @Binding var showingSettings: Bool  // Биндинг для показа настроек
+    @State private var selectedMode: AppMode?  // Выбранный режим приложения
+    @EnvironmentObject var alertManager: AlertManager  // Менеджер оповещений из окружения
+    @EnvironmentObject var appSettings: AppSettings  // Настройки из окружения
     
     var body: some View {
-        Group {
-            if let mode = selectedMode {
+        Group {  // Группа представлений для условного отображения
+            if let mode = selectedMode {  // Если выбран режим
                 switch mode {
                 case .imageToASCII:
                     ImageToASCIIView(onBack: { selectedMode = nil })
                 case .textToASCII:
                     TextToASCIIView(onBack: { selectedMode = nil })
                 }
-            } else {
+            } else {  // Иначе показываем главное меню
                 MenuScreenView(
                     onImageMode: { selectedMode = .imageToASCII },
-                    onTextMode: { selectedMode = .textToASCII }
+                    onTextMode: { selectedMode = .textToASCII },
+                    appSettings: appSettings
                 )
             }
         }
-        .sheet(isPresented: $showingSettings) {
+        .sheet(isPresented: $showingSettings) {  // Модальное окно настроек
             SettingsView()
                 .environmentObject(appSettings)
         }
-        .alert(item: $alertManager.alert) { item in
+        .alert(item: $alertManager.alert) { item in  // Оповещение при ошибках
             Alert(
                 title: Text(item.title),
                 message: Text(item.message),

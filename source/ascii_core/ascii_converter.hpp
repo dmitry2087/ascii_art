@@ -20,8 +20,8 @@ public:
     // Конструктор
     ASCIIConverter(const std::string& fontFilePath);
 
-    // Преобразование изображения в ASCII-арт
-    std::string convertImageToASCII(const std::string& imagePath, int outputWidth = 100);
+    // Преобразование изображения в ASCII-арт с учётом ширины и высоты
+    std::string convertImageToASCII(const std::string& imagePath, int maxWidth = 100, int maxHeight = 80);
 
     // Преобразование текста в ASCII-арт
     std::string convertTextToASCII(const std::string& text);

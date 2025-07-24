@@ -4,22 +4,44 @@
 # #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
 # "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
 #                                     m"                               
-# Ascii Art Application
+# ASCII ART Studio
 
 cmake_minimum_required(VERSION 3.20)
-project(AsciiArtApp LANGUAGES CXX)
+project(AsciiArtStudio LANGUAGES CXX)
 
 # Стандарт C++
 set(CMAKE_CXX_STANDARD 20)  # Используем C++20
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # Обязательный стандарт
 set(CMAKE_CXX_EXTENSIONS OFF)   # Без расширений компилятора для лучшей кроссплатформенности
 
+# Пути
+set(SOURCE ${CMAKE_SOURCE_DIR}/source)
+set(EXTERNAL ${CMAKE_SOURCE_DIR}/external)
+set(RESOURCES ${CMAKE_SOURCE_DIR}/Resources)
+set(JSON ${EXTERNAL}/json)
+set(STB ${EXTERNAL}/stb)
+set(IMGUI ${EXTERNAL}/imgui)
+set(MAC_GUI ${SOURCE}/gui/macos)
+set(LINUX_GUI ${SOURCE}/gui/linux)
+set(ASCII_CORE ${SOURCE}/ascii_core)
+
 # Подключаем общую библиотеку core на C++
-add_library(ascii_core
-    source/ascii_core/ascii_converter.cpp
-    source/ascii_core/ascii_converter.hpp
+add_library(CORE
+    ${ASCII_CORE}/ascii_converter.cpp
+    ${ASCII_CORE}/ascii_converter.hpp
 )
-target_include_directories(ascii_core PUBLIC source/ascii_core)
+
+# Указываем, что библиотека ascii_core (оно же ядро проекта) зависит от внешних библиотек
+target_include_directories(CORE 
+    PUBLIC ${ASCII_CORE}
+    PRIVATE ${JSON} ${STB}      # json.hpp и stb_image.h
+)
+
+# Определяем файлы ресурсов
+set(RESOURCE_FILES
+    ${RESOURCES}/ascii_font.json
+    ${RESOURCES}/icon.png
+)
 
 # Платформенные ветви
 if(APPLE)
@@ -34,38 +56,40 @@ if(APPLE)
 
     set(CMAKE_OSX_ARCHITECTURES arm64)
 
-    # Определяем файлы ресурсов
-    set(RESOURCE_FILES
-        Resources/ascii_font.json
-        Resources/icon.png
-)
-
-    add_executable(AsciiArtApp
-        source/gui/macos/App.swift
-        source/gui/macos/AppSettings.swift
-        source/gui/macos/MainMenuView.swift
-        source/gui/macos/ImageToASCIIView.swift
-        source/gui/macos/TextToASCIIView.swift
-        source/gui/macos/SharedComponents.swift
-        source/gui/macos/SettingsView.swift
-        source/gui/macos/MainScreenView.swift
-        source/gui/macos/AnimationType.swift
-        source/gui/macos/ASCIIConverterBridging.h  # Заголовочный файл для Swift
+    add_executable(${PROJECT_NAME}
+        ${MAC_GUI}/App.swift
+        ${MAC_GUI}/AppSettings.swift
+        ${MAC_GUI}/MainMenuView.swift
+        ${MAC_GUI}/ImageToASCIIView.swift
+        ${MAC_GUI}/TextToASCIIView.swift
+        ${MAC_GUI}/SharedComponents.swift
+        ${MAC_GUI}/SettingsView.swift
+        ${MAC_GUI}/MenuScreenView.swift
+        ${MAC_GUI}/AnimationType.swift
+        ${MAC_GUI}/AlertManager.swift
+        ${MAC_GUI}/AppMode.swift
+        ${MAC_GUI}/AnimationViewModel.swift
+        ${MAC_GUI}/BackgroundAnimationView.swift
+        ${MAC_GUI}/Extensions.swift
+        ${MAC_GUI}/ImageToASCIIViewModel.swift
+        ${MAC_GUI}/TextToASCIIViewModel.swift
         ${RESOURCE_FILES}
     )
 
     # Указываем, что файлы ресурсов должны быть помещены в папку Resources бандла
     set_source_files_properties(${RESOURCE_FILES} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources
-)
+    )
 
-    target_link_libraries(AsciiArtApp PRIVATE ascii_core)   
-    set_target_properties(AsciiArtApp PROPERTIES
+    target_link_libraries(${PROJECT_NAME} PRIVATE CORE)   
+    set_target_properties(${PROJECT_NAME} PROPERTIES
         XCODE_ATTRIBUTE_SWIFT_VERSION "5.9"  # Указываем версию Swift для Xcode
         XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "source/gui/macos/ASCIIConverterBridging.h" # Путь к заголовочному файлу для Swift
         MACOSX_BUNDLE TRUE  # Указываем, что это macOS приложение
         MACOSX_BUNDLE_BUNDLE_NAME "ASCII Art Studio"  # Имя приложения
         MACOSX_BUNDLE_BUNDLE_VERSION "1.0.0"  # Версия приложения
+        MACOSX_BUNDLE_INFO_STRING "ASCII ART Studio for macOS"  # Описание приложения
+        MACOSX_BUNDLE_COPYRIGHT "Copyright © 2025 dmitry2087"  # Авторские права
         MACOSX_BUNDLE_ICON_FILE "icon"  # Указываем имя файла иконки (без расширения .png)
     )
 
@@ -77,11 +101,39 @@ elseif(UNIX)
         message(WARNING "Unknown architecture: ${CMAKE_SYSTEM_PROCESSOR}")
     endif()
 
-    add_executable(AsciiArtApp
-        source/gui/linux/main.cpp
+    # Требуем OpenGL
+    find_package(OpenGL REQUIRED)
+    # Требуем GLFW 3.3 или новее
+    find_package(glfw3 3.3 REQUIRED)
+
+
+    add_executable(AsciiArtStudio
+        ${LINUX_GUI}/main.cpp
+        ${LINUX_GUI}/gui.cpp
+        ${LINUX_GUI}/gui.hpp
+        ${RESOURCE_FILES}
     )
 
-    target_link_libraries(AsciiArtApp PRIVATE ascii_core imgui stb pthread) 
+    # Подключаем библиотеку ImGui для Linux GUI на C++
+    add_library(imgui
+        ${IMGUI}/imgui.cpp
+        ${IMGUI}/imgui.h
+        ${IMGUI}/imgui_draw.cpp
+        ${IMGUI}/imgui_widgets.cpp
+        ${IMGUI}/imgui_tables.cpp
+        ${IMGUI}/imgui_impl_glfw.cpp
+        ${IMGUI}/imgui_impl_glfw.h
+        ${IMGUI}/imgui_impl_opengl3.cpp
+        ${IMGUI}/imgui_impl_opengl3.h
+    )
+
+    target_include_directories(${PROJECT_NAME} 
+        PRIVATE ${IMGUI}     # imgui files
+    )  
+
+    target_link_libraries(${PROJECT_NAME} 
+        PRIVATE CORE imgui glfw OpenGL::GL dl # Подключаем библиотеки: CORE, imgui, glfw, OpenGL и dl
+    ) 
 
 else()
     message(FATAL_ERROR "Unsupported platform")

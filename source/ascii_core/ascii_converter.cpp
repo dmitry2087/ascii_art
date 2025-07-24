@@ -11,9 +11,10 @@
 #include <format>
 #include <fstream>
 #include <sstream>
-#include "../../external/json/json.hpp"
+#include <algorithm>  // Для std::min
+#include "json.hpp"
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../external/stb/stb_image.h"
+#include "stb_image.h"
 
 using json = nlohmann::json;
 
@@ -32,7 +33,7 @@ void ASCIIConverter::loadAsciiFont(const std::string& fontFilePath) {
     file >> j;
 
     for (auto& [key, value] : j.items()) {
-        if (key.length() == 1) {
+        if (key.length() == 1) {  // Проверяем, что ключ — один символ (поддержка строчных и заглавных)
             char c = key[0];
             std::vector<std::string> pattern;
             for (const auto& line : value) {
@@ -46,7 +47,7 @@ void ASCIIConverter::loadAsciiFont(const std::string& fontFilePath) {
 }
 
 // Преобразование изображения в ASCII-арт
-std::string ASCIIConverter::convertImageToASCII(const std::string& imagePath, int outputWidth) {
+std::string ASCIIConverter::convertImageToASCII(const std::string& imagePath, int maxWidth, int maxHeight) {
     // Загрузка изображения с помощью stb_image
     int width, height, channels;
     unsigned char* image = stbi_load(imagePath.c_str(), &width, &height, &channels, 0);
@@ -54,24 +55,32 @@ std::string ASCIIConverter::convertImageToASCII(const std::string& imagePath, in
         return std::format("Ошибка: Не удалось загрузить изображение '{}'", imagePath);
     }
 
-    // Вычисляем высоту, сохраняя пропорции
-    int outputHeight = static_cast<int>(static_cast<double>(outputWidth) * height / width);
+    // Вычисляем масштаб для вписывания в maxWidth и maxHeight, сохраняя пропорции
+    double scale = std::min(static_cast<double>(maxWidth) / width, static_cast<double>(maxHeight) / height);
+    int outputWidth = static_cast<int>(width * scale);
+    int outputHeight = static_cast<int>(height * scale);
 
     // Массив символов для градаций яркости
     const std::string chars = "@%#*+=-:. ";
 
     std::string result;
+    result.reserve(outputWidth * outputHeight + outputHeight); // Резервируем память для результата
     for (int y = 0; y < outputHeight; ++y) {
         for (int x = 0; x < outputWidth; ++x) {
             // Вычисляем соответствующий пиксель
-            int pixelX = static_cast<int>(static_cast<double>(x) * width / outputWidth);
-            int pixelY = static_cast<int>(static_cast<double>(y) * height / outputHeight);
+            int pixelX = static_cast<int>(static_cast<double>(x) / scale);
+            int pixelY = static_cast<int>(static_cast<double>(y) / scale);
             int index = (pixelY * width + pixelX) * channels;
 
-            // Вычисляем яркость (усреднённая по RGB)
-            float brightness = (image[index] + image[index + 1] + image[index + 2]) / (3.0f * 255.0f);
-            int charIndex = static_cast<int>(brightness * (chars.size() - 1));
-            result += chars[chars.size() - 1 - charIndex];
+            // Проверка на выход за границы
+            if (index + 2 < width * height * channels) {
+                // Вычисляем яркость (усреднённая по RGB)
+                float brightness = (image[index] + image[index + 1] + image[index + 2]) / (3.0f * 255.0f);
+                int charIndex = static_cast<int>(brightness * (chars.size() - 1));
+                result += chars[chars.size() - 1 - charIndex];
+            } else {
+                result += ' ';
+            }
         }
         result += "\n";
     }
@@ -102,7 +111,12 @@ std::string ASCIIConverter::convertTextToASCII(const std::string& text) {
 
     std::ostringstream oss;
     for (size_t i = 0; i < result.size(); ++i) {
-        oss << result[i];
+        // Удаляем лишние пробелы в конце строк
+        std::string trimmed = result[i];
+        while (!trimmed.empty() && trimmed.back() == ' ') {
+            trimmed.pop_back();
+        }
+        oss << trimmed;
         if (i + 1 != result.size()) oss << "\n";
     }
     return oss.str();
@@ -110,10 +124,10 @@ std::string ASCIIConverter::convertTextToASCII(const std::string& text) {
 
 // C-совместимые функции для Swift
 extern "C" {
-    const char* convert_image_to_ascii(const char* fontPath, const char* imagePath, int outputWidth) {
+    const char* convert_image_to_ascii(const char* fontPath, const char* imagePath, int maxWidth, int maxHeight) {
         try {
             ASCIIConverter converter(fontPath);
-            std::string result = converter.convertImageToASCII(imagePath, outputWidth);
+            std::string result = converter.convertImageToASCII(imagePath, maxWidth, maxHeight);
             char* cstr = new char[result.size() + 1];
             std::strcpy(cstr, result.c_str());
             return cstr;

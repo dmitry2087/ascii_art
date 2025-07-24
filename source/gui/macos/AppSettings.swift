@@ -4,17 +4,17 @@
 // #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
 // "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
 //                                     m"                               
-// Приложение ASCII-ART для macOS                               
+// Приложение ASCII Art Studio для macOS
 // AppSettings.swift
 
 import SwiftUI
 
-enum AnimationColor: String, CaseIterable, Identifiable {
+enum AnimationColor: String, CaseIterable, Identifiable {  // Перечисление цветов анимации
     case green, white, red, blue, orange, purple, pink
     
-    var id: String { self.rawValue }
+    var id: String { self.rawValue }  // Идентификатор
     
-    var color: Color {
+    var color: Color {  // Соответствующий цвет SwiftUI
         switch self {
         case .green: return .green
         case .white: return .white
@@ -27,7 +27,7 @@ enum AnimationColor: String, CaseIterable, Identifiable {
     }
 }
 
-class AppSettings: ObservableObject {
-    @Published var selectedAnimationType: AnimationType = .randomNoise
-    @Published var selectedColor: AnimationColor = .green
+class AppSettings: ObservableObject {  // Класс настроек приложения, наблюдаемый
+    @Published var selectedAnimationType: AnimationType = .randomNoise  // Выбранный тип анимации
+    @Published var selectedColor: AnimationColor = .green  // Выбранный цвет
 }

@@ -4,21 +4,21 @@
 // #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
 // "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
 //                                     m"                               
-// Приложение ASCII-ART для macOS
+// Приложение ASCII Art Studio для macOS
 // AnimationType.swift
 
 import SwiftUI
 import Foundation
 
-enum AnimationType: String, CaseIterable {
+enum AnimationType: String, CaseIterable {  // Перечисление типов анимаций для фона
     case randomNoise // Случайный шум
     case wavePattern // Волновой узор
     case fallingChars // Падающие символы
     
-    // Обновление кадра анимации
+    // Обновление кадра анимации на основе выбранного типа
     func updateFrame(width: Int, height: Int, frameCount: Int) -> String {
         switch self {
-        case .randomNoise:
+        case .randomNoise:  // Генерация случайного шума
             let chars = Array(" .:-=+*#%@")
             var frame = ""
             for _ in 0..<height {
@@ -29,7 +29,7 @@ enum AnimationType: String, CaseIterable {
             }
             return frame
             
-        case .wavePattern:
+        case .wavePattern:  // Генерация волнового узора с использованием синусоиды
             var frame = ""
             let chars = Array("~-=+")
             for y in 0..<height {
@@ -42,7 +42,7 @@ enum AnimationType: String, CaseIterable {
             }
             return frame
             
-        case .fallingChars:
+        case .fallingChars:  // Генерация падающих символов
             var frame = ""
             let chars = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
             for _ in 0..<height {

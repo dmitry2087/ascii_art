@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 // C-совместимые функции для вызова из Swift
-const char* convert_image_to_ascii(const char* fontPath, const char* imagePath, int outputWidth);
+const char* convert_image_to_ascii(const char* fontPath, const char* imagePath, int maxWidth, int maxHeight);
 const char* convert_text_to_ascii(const char* fontPath, const char* text);
 void free_ascii_string(const char* str);
 

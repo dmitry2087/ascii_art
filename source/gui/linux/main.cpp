@@ -4,6 +4,69 @@
 // #   #  # # #    #      #     #      #m#     m"   #    # #   "#   m"  
 // "#m##  # # #  mm#mm    "mm   #      "#    m#mmmm  #mm#  "#mmm"  m"   
 //                                     m"                               
-// ASCII-ART app for Linux                               
+// Приложение ASCII ART Studio для Linux                     
+// main.cpp (Главный файл приложения Linux)
 
-// In Developing.
+#include <iostream>
+#include <format>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h>
+#include "ascii_converter.hpp"
+#include "gui.hpp"
+
+int main() {
+    // Инициализация GLFW
+    if (!glfwInit()) {
+        std::cerr << std::format("GLFW init failed") << std::endl;
+        return -1;
+    }
+    GLFWwindow* window = glfwCreateWindow(800, 600, "ASCII Art Studio", nullptr, nullptr);
+    if (!window) {
+        std::cerr << std::format("Window creation failed") << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+
+    // Инициализация ImGui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
+    // Создаём конвертер
+    ASCIIConverter converter("ascii_font.json");
+
+    // Создаём GUI
+    Gui gui(&converter);
+
+    // Главный цикл
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        gui.draw();  // Рисуем UI
+
+        ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(window);
+    }
+
+    // Очистка
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    glfwDestroyWindow(window);
+    glfwTerminate();
+
+    return 0;
+}
