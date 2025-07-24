@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 #include "ascii_converter.hpp"
 #include "gui.hpp"
+#include <stb_image.h>
 
 int main() {
     // Инициализация GLFW
@@ -30,6 +31,19 @@ int main() {
     }
     glfwMakeContextCurrent(window);
 
+    GLFWimage images[1];
+    int width, height, channels;
+        unsigned char* img = stbi_load("Resources/icon.png", &width, &height, &channels, 0);
+    if (img) {
+        images[0].width = width;
+        images[0].height = height;
+        images[0].pixels = img;
+        glfwSetWindowIcon(window, 1, images);
+        stbi_image_free(img);
+    } else {
+        std::cerr << "Failed to load icon.png" << std::endl;
+    }
+
     // Инициализация ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -37,7 +51,7 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 330");
 
     // Создаём конвертер
-    ASCIIConverter converter("ascii_font.json");
+    ASCIIConverter converter("Resources/ascii_font.json");
 
     // Создаём GUI
     Gui gui(&converter);

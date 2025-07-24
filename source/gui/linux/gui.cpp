@@ -33,7 +33,9 @@ void Gui::draw() {
     if (showTextWindow) {
         ImGui::Begin("Конвертер текста в ASCII", &showTextWindow);
         char buffer[256] = {0};
-        std::strcpy(buffer, inputText.c_str());
+        strncpy(buffer, inputText.c_str(), sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0';  // Обеспечиваем null-терминированность
+
         if (ImGui::InputText("Введите текст", buffer, sizeof(buffer))) {
             inputText = buffer;
             asciiResultText = converter->convertTextToASCII(inputText);
@@ -49,7 +51,9 @@ void Gui::draw() {
     if (showImageWindow) {
         ImGui::Begin("Конвертер изображений в ASCII", &showImageWindow);
         char buffer[256] = {0};
-        std::strcpy(buffer, imagePath.c_str());
+        strncpy(buffer, inputText.c_str(), sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0';  // Обеспечиваем null-терминированность
+
         if (ImGui::InputText("Путь к изображению", buffer, sizeof(buffer))) {
             imagePath = buffer;
             asciiResultImage = converter->convertImageToASCII(imagePath, 100, 80);

@@ -106,7 +106,7 @@ elseif(UNIX)
     # Требуем GLFW 3.3 или новее
     find_package(glfw3 3.3 REQUIRED)
 
-
+    # Создаем исполняемый файл для Linux GUI на C++
     add_executable(AsciiArtStudio
         ${LINUX_GUI}/main.cpp
         ${LINUX_GUI}/gui.cpp
@@ -125,6 +125,12 @@ elseif(UNIX)
         ${IMGUI}/imgui_impl_glfw.h
         ${IMGUI}/imgui_impl_opengl3.cpp
         ${IMGUI}/imgui_impl_opengl3.h
+        ${IMGUI}/imgui_impl_opengl3_loader.h
+        ${IMGUI}/imconfig.h
+        ${IMGUI}/imgui_internal.h
+        ${IMGUI}/imstb_rectpack.h
+        ${IMGUI}/imstb_textedit.h
+        ${IMGUI}/imstb_truetype.h
     )
 
     target_include_directories(${PROJECT_NAME} 
