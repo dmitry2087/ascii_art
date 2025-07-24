@@ -141,6 +141,9 @@ elseif(UNIX)
         PRIVATE CORE imgui glfw OpenGL::GL dl # Подключаем библиотеки: CORE, imgui, glfw, OpenGL и dl
     ) 
 
+    file(COPY ${RESOURCES}/ascii_font.json DESTINATION ${CMAKE_BINARY_DIR}/Resources)
+    file(COPY ${RESOURCES}/icon.png DESTINATION ${CMAKE_BINARY_DIR}/Resources)
+
 else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
